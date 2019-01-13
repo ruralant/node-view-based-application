@@ -4,9 +4,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const errorController = require('./controllers/error');
-const sequalize = require('./util/database');
+const sequelize = require('./util/database');
 const Product = require('./models/product');
 const User = require('./models/user');
+const Cart = require('./models/cart');
+const CartItem = require('./models/cart-item');
 
 const app = express();
 
@@ -35,16 +37,19 @@ app.use(errorController.get404);
 
 Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE'});
 User.hasMany(Product);
+User.hasOne(Cart);
+Cart.belongsTo(User);
+Cart.belongsToMany(Product, { through: CartItem });
+Product.belongsToMany(Cart, { through: CartItem });
+
 
 // creates the appropriate tables if they do not exist
-sequalize.sync() // force: to be removed in production
+sequelize.sync() // force: to be removed in production
   .then(() => User.findByPk(1))
   .then(user => {
     if (!user) User.create({ name: 'Admin', email: 'admin@admin.com' });
-    return Promise.resolve(user);
+    return user;
   })
-  .then(user => {
-    // console.log(user);
-    app.listen(3000);
-  })
+  .then(user => user.createCart())
+  .then(() => app.listen(3000))
   .catch(e => console.log(e));
