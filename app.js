@@ -23,9 +23,16 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({ secret: process.env.SECRET, resave: false, saveUninitialized: false, store: store }));
+app.use(session({
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: store
+}));
 
 app.use((req, res, next) => {
   User.findById(process.env.SUPERID)
@@ -43,14 +50,18 @@ app.use(authRoutes);
 app.use(errorController.get404);
 
 mongoose
-  .connect(process.env.MONGODB_URI, { useNewUrlParser: true })
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true
+  })
   .then(() => {
     User.findOne().then(user => {
       if (!user) {
         const user = new User({
           name: 'Anto',
           email: 'anto@test.it',
-          cart: { items: [] },
+          cart: {
+            items: []
+          },
         });
         user.save();
       }
