@@ -8,7 +8,6 @@ exports.getProducts = async (req, res, next) => {
       prods: products,
       pageTitle: 'All Products',
       path: '/products',
-      isAuthenticated: req.session.isLoggedIn,
     });
   } catch (e) {
     console.log(e);
@@ -22,8 +21,7 @@ exports.getProduct = async (req, res, next) => {
     res.render('shop/product-detail', {
       product: product,
       pageTitle: product.title,
-      path: '/products',
-      isAuthenticated: req.session.isLoggedIn,
+      path: '/products'
     });
   } catch (e) {
     console.log(e);
@@ -37,7 +35,6 @@ exports.getIndex = async (req, res, next) => {
       prods: products,
       pageTitle: 'Shop',
       path: '/',
-      isAuthenticated: req.session.isLoggedIn,
     });
   } catch (e) {
     console.log(e);
@@ -47,12 +44,11 @@ exports.getIndex = async (req, res, next) => {
 exports.getCart = async (req, res, next) => {
   try {
     const user = await req.user.populate('cart.items.productId').execPopulate();
-    const products = user.cart.items;
+    const products = await user.cart.items;
     res.render('shop/cart', {
       path: '/cart',
       pageTitle: 'Your Cart',
       products: products,
-      isAuthenticated: req.session.isLoggedIn,
     });
   } catch (e) {
     console.log(e);
@@ -93,13 +89,14 @@ exports.postOrder = async (req, res, next) => {
     });
     const order = new Order({
       user: {
-        name: req.user.name,
+        email: req.user.email,
         userId: req.user
       },
       products: products
     });
-    await order.save()
-    req.user.clearCart();
+    await order.save();
+    await req.user.clearCart();
+    res.redirect('/orders');
   } catch (e) {
     console.log(e);
   }
@@ -114,7 +111,6 @@ exports.getOrders = async (req, res, next) => {
       path: '/orders',
       pageTitle: 'Your Orders',
       orders: orders,
-      isAuthenticated: req.session.isLoggedIn,
     });
   } catch (e) {
     console.log(e);
