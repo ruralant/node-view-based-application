@@ -1,6 +1,6 @@
 {
   "name": "nodejs-playground",
-  "version": "2.5.0",
+  "version": "3.0.0",
   "description": "A node playground",
   "main": "app.js",
   "scripts": {
@@ -11,11 +11,14 @@
   "author": "Antonio Rossi",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^1.18.3"
+    "nodemon": "^1.18.10"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
+    "connect-flash": "^0.1.1",
     "connect-mongodb-session": "^2.1.1",
+    "csurf": "^1.9.0",
     "ejs": "^2.6.1",
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",
