@@ -1,10 +1,17 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
+const sendGridTransport = require('nodemailer-sendgrid-transport');
+
+const transporter = nodemailer.createTransport(sendGridTransport({
+  auth: {
+    api_key: process.env.SENDGRID_KEY
+  }
+}));
 
 exports.getLogin = (req, res, next) => {
   let message = req.flash('error');
   message.length > 0 ? message = message[0] : message = null;
-  console.log(message);
   res.render('auth/login', {
     path: '/login',
     pageTitle: 'Login',
@@ -77,6 +84,12 @@ exports.postSignup = async (req, res, next) => {
     });
     await newUser.save();
     res.redirect('/login');
+    transporter.sendMail({
+      to: email,
+      from: process.env.EMAIL_SENDER,
+      subject: 'New user created',
+      html: '<h1>Welcome to the Node Playground!</h1><br><p>Enjoy the ride</p>'
+    });
   } catch (e) {
     console.log(e);
   }
