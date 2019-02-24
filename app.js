@@ -34,13 +34,17 @@ app.use(session({
   store: store
 }));
 
-app.use((req, res, next) => {
-  User.findById(process.env.SUPERID)
-    .then(user => {
-      req.user = user;
-      next();
-    })
-    .catch(err => console.log(err));
+app.use(async (req, res, next) => {
+  if (!req.session.user) {
+    return next();
+  }
+  try {
+    const user = await User.findById(req.session.user._id);
+    req.user = user;
+    next();
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 app.use('/admin', adminRoutes);
@@ -53,19 +57,5 @@ mongoose
   .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true
   })
-  .then(() => {
-    User.findOne().then(user => {
-      if (!user) {
-        const user = new User({
-          name: 'Anto',
-          email: 'anto@test.it',
-          cart: {
-            items: []
-          },
-        });
-        user.save();
-      }
-    });
-    app.listen(process.env.PORT);
-  })
+  .then(() => app.listen(process.env.PORT))
   .catch(err => console.log(err));
