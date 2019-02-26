@@ -50,6 +50,7 @@ exports.getEditProduct = async (req, res, next) => {
 };
 
 exports.postEditProduct = async (req, res, next) => {
+  const userId = req.user._id;
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
@@ -58,6 +59,9 @@ exports.postEditProduct = async (req, res, next) => {
 
   try {
     const product = await Product.findById(prodId);
+
+    if (!product || product.userId.toString() !== userId.toString()) return res.redirect('/');
+
     product.title = updatedTitle;
     product.price = updatedPrice;
     product.description = updatedDesc;
@@ -70,8 +74,11 @@ exports.postEditProduct = async (req, res, next) => {
 };
 
 exports.getProducts = async (req, res, next) => {
+  const userId = req.user._id;
   try {
-    const products = await Product.find();
+    const products = await Product.find({
+      userId
+    });
     res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin Products',
@@ -83,9 +90,13 @@ exports.getProducts = async (req, res, next) => {
 };
 
 exports.postDeleteProduct = async (req, res, next) => {
+  const userId = req.user._id;
   const prodId = req.body.productId;
   try {
-    await Product.findByIdAndRemove(prodId);
+    await Product.deleteOne({
+      _id: prodId,
+      userId
+    });
     res.redirect('/admin/products');
   } catch (e) {
     console.log(e);
