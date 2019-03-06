@@ -14,16 +14,19 @@
     <% } %>
     <form class="login-form" action="/signup" method="POST">
       <div class="form-control">
-        <label for="email">E-Mail</label>
-        <input type="email" name="email" id="email">
+        <label for="email">Email</label>
+        <input class="<%= validationErrors.find(e => e.param === 'email') ? 'invalid' : '' %>" type="email" name="email"
+          id="email" value="<%= oldInput.email %>">
       </div>
       <div class="form-control">
         <label for="password">Password</label>
-        <input type="password" name="password" id="password">
+        <input class="<%= validationErrors.find(e => e.param === 'password') ? 'invalid' : '' %>" type="password" name="password"
+          id="password" value="<%= oldInput.password %>">
       </div>
       <div class="form-control">
         <label for="confirmPassword">Confirm Password</label>
-        <input type="password" name="passwordConfirmation" id="passwordConfirmation">
+        <input class="<%= validationErrors.find(e => e.param === 'passwordConfirmation') ? 'invalid' : '' %>" type="password"
+          name="passwordConfirmation" id="passwordConfirmation" value="<%= oldInput.passwordConfirmation %>">
       </div>
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <button class="btn" type="submit">Signup</button>
