@@ -60,7 +60,7 @@ exports.postCart = async (req, res, next) => {
   try {
     const product = await Product.findById(prodId);
     await req.user.addToCart(product);
-    res.redirect('/cart')
+    res.redirect('/cart');
   } catch (e) {
     console.log(e);
   }
@@ -82,9 +82,7 @@ exports.postOrder = async (req, res, next) => {
     const products = user.cart.items.map(i => {
       return {
         quantity: i.quantity,
-        product: {
-          ...i.productId._doc
-        }
+        product: { ...i.productId._doc }
       };
     });
     const order = new Order({
@@ -110,7 +108,7 @@ exports.getOrders = async (req, res, next) => {
     res.render('shop/orders', {
       path: '/orders',
       pageTitle: 'Your Orders',
-      orders: orders,
+      orders: orders
     });
   } catch (e) {
     console.log(e);
