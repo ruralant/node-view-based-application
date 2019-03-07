@@ -1,4 +1,5 @@
 node_modules
 .prettierrc
+.eslintrc.json
 .vscode
 config
