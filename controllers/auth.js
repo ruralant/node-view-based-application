@@ -134,7 +134,9 @@ exports.postSignup = async (req, res, next) => {
       html: '<h1>Welcome to the Node Playground!</h1><br><p>Enjoy the ride</p>'
     });
   } catch (e) {
-    console.log(e);
+    const error = new Error(e);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -185,7 +187,9 @@ exports.postReset = (req, res, next) => {
         `
       });
     } catch (e) {
-      console.log(e);
+      const error = new Error(e);
+      error.httpStatusCode = 500;
+      return next(error);
     }
   });
 };
@@ -216,7 +220,9 @@ exports.getNewPassword = async (req, res, next) => {
       token
     });
   } catch (e) {
-    console.log(e);
+    const error = new Error(e);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -248,6 +254,8 @@ exports.postNewPassword = async (req, res, next) => {
     await user.save();
     return res.redirect('/login');
   } catch (e) {
-    console.log(e);
+    const error = new Error(e);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
