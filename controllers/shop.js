@@ -10,7 +10,9 @@ exports.getProducts = async (req, res, next) => {
       path: '/products',
     });
   } catch (e) {
-    console.log(e);
+    const error = new Error(e);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -24,7 +26,9 @@ exports.getProduct = async (req, res, next) => {
       path: '/products'
     });
   } catch (e) {
-    console.log(e);
+    const error = new Error(e);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -37,7 +41,9 @@ exports.getIndex = async (req, res, next) => {
       path: '/',
     });
   } catch (e) {
-    console.log(e);
+    const error = new Error(e);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -51,7 +57,9 @@ exports.getCart = async (req, res, next) => {
       products: products,
     });
   } catch (e) {
-    console.log(e);
+    const error = new Error(e);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -62,7 +70,9 @@ exports.postCart = async (req, res, next) => {
     await req.user.addToCart(product);
     res.redirect('/cart');
   } catch (e) {
-    console.log(e);
+    const error = new Error(e);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -72,7 +82,9 @@ exports.postCartDeleteProduct = async (req, res, next) => {
     await req.user.removeFromCart(prodId);
     res.redirect('/cart');
   } catch (e) {
-    console.log(e);
+    const error = new Error(e);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -96,7 +108,9 @@ exports.postOrder = async (req, res, next) => {
     await req.user.clearCart();
     res.redirect('/orders');
   } catch (e) {
-    console.log(e);
+    const error = new Error(e);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -111,6 +125,8 @@ exports.getOrders = async (req, res, next) => {
       orders: orders
     });
   } catch (e) {
-    console.log(e);
+    const error = new Error(e);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
