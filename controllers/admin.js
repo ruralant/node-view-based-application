@@ -1,4 +1,6 @@
 const { validationResult } = require('express-validator/check');
+
+const fileHelper = require('../util/file');
 const Product = require('../models/product');
 
 exports.getAddProduct = (req, res, next) => {
@@ -17,6 +19,7 @@ exports.postAddProduct = async (req, res, next) => {
   const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
+
   if (!image) {
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Add Product',
@@ -132,6 +135,7 @@ exports.postEditProduct = async (req, res, next) => {
     product.price = updatedPrice;
     product.description = updatedDesc;
     if (image) {
+      fileHelper.deleteFile(product.imageUrl);
       product.imageUrl = image.path;
     }
     await product.save();
@@ -162,7 +166,13 @@ exports.getProducts = async (req, res, next) => {
 exports.postDeleteProduct = async (req, res, next) => {
   const userId = req.user._id;
   const prodId = req.body.productId;
+
   try {
+    const product =  await Product.findById(prodId);
+
+    if (!product) next(new Error('Product not found'));
+    
+    fileHelper.deleteFile(req.body.imageUrl);
     await Product.deleteOne({
       _id: prodId,
       userId
