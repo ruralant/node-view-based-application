@@ -1,4 +1,6 @@
 const { validationResult } = require('express-validator/check');
+
+const fileHelper = require('../util/file');
 const Product = require('../models/product');
 
 exports.getAddProduct = (req, res, next) => {
@@ -14,9 +16,25 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = async (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
+
+  if (!image) {
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Add Product',
+      path: '/admin/add-product',
+      editing: false,
+      hasError: true,
+      product: {
+        title,
+        price,
+        description
+      },
+      errorMessage: 'Unsupported attached file',
+      validationErrors: []
+    });
+  }
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -27,7 +45,6 @@ exports.postAddProduct = async (req, res, next) => {
       hasError: true,
       product: {
         title,
-        imageUrl,
         price,
         description
       },
@@ -35,6 +52,8 @@ exports.postAddProduct = async (req, res, next) => {
       validationErrors: errors.array()
     });
   }
+
+  const imageUrl = image.path;
 
   const product = new Product({
     title,
@@ -86,7 +105,7 @@ exports.postEditProduct = async (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImageUrl = req.body.imageUrl;
+  const image = req.file;
   const updatedDesc = req.body.description;
   const errors = validationResult(req);
 
@@ -98,7 +117,6 @@ exports.postEditProduct = async (req, res, next) => {
       hasError: true,
       product: {
         title: updatedTitle,
-        imageUrl: updatedImageUrl,
         price: updatedPrice,
         description: updatedDesc
       },
@@ -116,7 +134,10 @@ exports.postEditProduct = async (req, res, next) => {
     product.title = updatedTitle;
     product.price = updatedPrice;
     product.description = updatedDesc;
-    product.imageUrl = updatedImageUrl;
+    if (image) {
+      fileHelper.deleteFile(product.imageUrl);
+      product.imageUrl = image.path;
+    }
     await product.save();
     res.redirect('/admin/products');
   } catch (e) {
@@ -145,7 +166,13 @@ exports.getProducts = async (req, res, next) => {
 exports.postDeleteProduct = async (req, res, next) => {
   const userId = req.user._id;
   const prodId = req.body.productId;
+
   try {
+    const product =  await Product.findById(prodId);
+
+    if (!product) next(new Error('Product not found'));
+    
+    fileHelper.deleteFile(req.body.imageUrl);
     await Product.deleteOne({
       _id: prodId,
       userId

@@ -2,4 +2,6 @@ node_modules
 .prettierrc
 .eslintrc.json
 .vscode
+.images
+.data
 config
