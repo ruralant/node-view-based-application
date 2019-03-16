@@ -172,7 +172,7 @@ exports.postDeleteProduct = async (req, res, next) => {
 
     if (!product) next(new Error('Product not found'));
     
-    fileHelper.deleteFile(req.body.imageUrl);
+    fileHelper.deleteFile(product.imageUrl);
     await Product.deleteOne({
       _id: prodId,
       userId

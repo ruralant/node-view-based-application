@@ -18,14 +18,12 @@ router.post('/add-product', [
   body('description')
     .isLength({ min: 8, max: 255 })
     .trim()
-
 ], authenticate, adminController.postAddProduct);
 
 router.get('/edit-product/:productId', authenticate, adminController.getEditProduct);
 
 router.post('/edit-product', [
   body('title')
-    .isAlphanumeric()
     .isLength({ min: 3 })
     .trim(),
   body('price')
