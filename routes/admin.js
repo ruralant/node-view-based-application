@@ -33,6 +33,6 @@ router.post('/edit-product', [
     .trim()
 ], authenticate, adminController.postEditProduct);
 
-router.post('/delete-product', authenticate, adminController.postDeleteProduct);
+router.delete('/product/:productId', authenticate, adminController.deleteProduct);
 
 module.exports = router;
