@@ -11,6 +11,10 @@ const flash = require('connect-flash');
 const multer = require('multer');
 
 const errorController = require('./controllers/error');
+const shopController = require('./controllers/shop');
+
+const authenticate = require('./middleware/is-auth');
+
 const User = require('./models/user');
 
 const app = express();
@@ -57,12 +61,10 @@ app.use(session({
   saveUninitialized: false,
   store: store
 }));
-app.use(csftProtection);
 app.use(flash());
 
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn;
-  res.locals.csrfToken = req.csrfToken();
   next();
 });
 
@@ -80,6 +82,15 @@ app.use(async (req, res, next) => {
   } catch (e) {
     throw new Error(e);
   }
+});
+
+// Stripe route don't need to be protected by the csrf token
+app.post('/create-order', authenticate, shopController.postOrder);
+
+app.use(csftProtection);
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
 });
 
 app.use('/admin', adminRoutes);
