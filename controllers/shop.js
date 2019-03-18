@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const PDFDocument = require('pdfkit');
+const stripe = require("stripe")(process.env.STRIPE_KEY);
 
 const Product = require('../models/product');
 const Order = require('../models/order');
@@ -122,23 +123,61 @@ exports.postCartDeleteProduct = async (req, res, next) => {
   }
 };
 
-exports.postOrder = async (req, res, next) => {
+exports.getCheckout = async (req, res, next) => {
   try {
     const user = await req.user.populate('cart.items.productId').execPopulate();
+    const products = await user.cart.items;
+    let total = 0;
+    products.forEach(p => {
+      total += p.quantity * p.productId.price;
+    });
+    res.render('shop/checkout', {
+      path: '/checkout',
+      pageTitle: 'Checkout',
+      products: products,
+      totalAmount: total
+    });
+  } catch (e) {
+    const error = new Error(e);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+}
+
+exports.postOrder = async (req, res, next) => {
+  try {
+    const { stripeToken } = req.body;
+    let totalAmount = 0;
+
+    const user = await req.user.populate('cart.items.productId').execPopulate();
+
+    user.cart.items.forEach(p => {
+      totalAmount += p.quantity * p.productId.price;
+    });
+
     const products = user.cart.items.map(i => {
       return {
         quantity: i.quantity,
         product: { ...i.productId._doc }
       };
     });
-    const order = new Order({
+    let order = new Order({
       user: {
         email: req.user.email,
         userId: req.user
       },
       products: products
     });
-    await order.save();
+    order = await order.save();
+
+    await stripe.charges.create({
+      amount: totalAmount * 100,
+      currency: 'gbp',
+      description: 'Demo Order',
+      source: stripeToken,
+      metadata: { order_id: order._id.toString() }
+    });
+
     await req.user.clearCart();
     res.redirect('/orders');
   } catch (e) {
