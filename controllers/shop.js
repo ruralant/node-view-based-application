@@ -181,7 +181,6 @@ exports.postOrder = async (req, res, next) => {
     await req.user.clearCart();
     res.redirect('/orders');
   } catch (e) {
-    console.log(e);
     const error = new Error(e);
     error.httpStatusCode = 500;
     return next(error);
